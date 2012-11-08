@@ -2,6 +2,7 @@
 	"sourceRoot": "./",
 	"targetRoot": "./build",
 	"fileFormat": "js,css,html,htm,png,gif,jpg,jpeg",
+	"debug": true,
 	"cmds": {
 		"concat_compress_copy": "concat|compress|copy",
 		"concat_copy": "concat|copy",
@@ -11,7 +12,7 @@
 	},
 	"rules": {
 		"translate_index": {
-			"cmd": "translate|copy",
+			"cmd": "concat|copy",
 			"source": "",
 			"target": "",
 			"params": []

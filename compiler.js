@@ -85,20 +85,32 @@ var makePathArray = function(arr, root){
 	return arr;
 }
 
+var analyseCmd = function(cmd){
+	if(cmds[cmd]){
+		if(ztool.isString(cmds[cmd])){
+			cmd = cmds[cmd];
+			
+		}
+	}else{
+    	throw 'the cmd "' + cmd + '" is not exists. ';
+	}
+}
+
 /**
  * 分析每条规则并创建任务
  */
 var createTasks = function(){
 	tasks = [];
-	var task, rule;
+	var task, rule, cmd;
 	for(var r in config.rules){
 		rule = config.rules[r];
 		var source = makePathArray(rule.source, config.sourceRoot),
 			target = path.join(config.targetRoot, rule.target);// makePathArray(rule.target, config.targetRoot);
 		//处理用管道串起来的多个命令
-		var rCmds = (rule.cmd || config.defaultCmd).replace(/\s+/g, '').split('|');
+		cmd = rule.cmd || config.defaultCmd;
+		var rCmds = analyseCmd(cmd);
 		var len = rCmds.length;
-		var params = rule.params;
+		var params = rule.params || {};
 		if(!ztool.isArray(params) && len > 1){
 			//如果传入的params 参数不是数组, 且命令不止一个
 			//就把params 都传入到所有命令
@@ -108,34 +120,43 @@ var createTasks = function(){
 			}
 			params = arr;
 		}
-		// var prevTarget;
-		for(var i = 0, cmd; cmd = rCmds[i]; i++) {
-		    if(!cmds[cmd]){
+		task = {
+			id: r,
+			params: params,
+			source: source,
+			target: target
+		};
+		tasks.push(task);
+		// console.log('rule:', rule);
+		if(len === 1){
+			cmd = rCmds[0];
+			if(!cmds[cmd]){
 		    	throw 'the cmd "' + cmd + '" is not exists. ' + r;
 		    }
-		    task = {
-				id: r + '.' + cmd,
-				cmd: cmd,
-				params: params[i]
-			};
-			tasks.push(task);
-			if(len === 1){//只有一个命令的情况
-				task.source = source;
-				task.target = target;
-				break;
+		    task.id = r + '.' + cmd;
+			task.cmd = cmd;
+			continue;
+		}
+		task.subs = [];
+		for(var i = 0, sub; cmd = rCmds[i]; i++) {
+		    sub = {
+		    	id: task.id + '.' + cmd,
+		    	params: params[i]
+		    }
+		    task.subs.push(sub);
+		    if(i === len - 1){
+		    	//最后一个命令, 指定其输出 target
+				target = task.target;
+			}else{
+				target = path.join(COMPLIER_TEMP, sub.id);
 			}
-			//TODO
-			// if(i === 0){//第一个命令,指定源
-			// 	task.source = source;
-			// 	task.target = COMPLIER_TEMP + '/' + task.id;
-			// }
-			// if(i === len - 1){
-			// 	//最后一个命令, 指定其输出 target
-			// 	task.target = target;
-			// }
+			sub.source = source;
+			sub.target = target;
+			//上一个命令的输出是下一个命令的输入
+			source = target;
 		}
 	}
-	console.log(tasks);
+	console.dir(tasks);
 }
 /**
  * 执行所有任务
