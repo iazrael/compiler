@@ -32,7 +32,7 @@ var readConfig = function(){
 
 	var content = fs.readFileSync(fileName);
 	try{
-		config = JSON.parse(content);
+		config = ztool.friendlyJsonParse(content);
 	}catch(e){
 		throw 'the config file is not a json file';
 	}
@@ -86,14 +86,20 @@ var makePathArray = function(arr, root){
 }
 
 var analyseCmd = function(cmd){
-	if(cmds[cmd]){
-		if(ztool.isString(cmds[cmd])){
-			cmd = cmds[cmd];
-			
+	var result = [];
+	var arr = cmd.replace(/\s+/g, '').split('|');
+	for(var i = 0; i < arr.length; i++){
+		cmd = arr[i];
+		if(!cmds[cmd]){
+			throw 'the cmd "' + cmd + '" is not exists. ';
 		}
-	}else{
-    	throw 'the cmd "' + cmd + '" is not exists. ';
+		if(ztool.isString(cmds[cmd])){
+			result = result.concat(analyseCmd(cmds[cmd]))
+		}else{
+			result.push(cmd);
+		}
 	}
+	return result;
 }
 
 /**
@@ -109,6 +115,7 @@ var createTasks = function(){
 		//处理用管道串起来的多个命令
 		cmd = rule.cmd || config.defaultCmd;
 		var rCmds = analyseCmd(cmd);
+		console.log(rCmds);
 		var len = rCmds.length;
 		var params = rule.params || {};
 		if(!ztool.isArray(params) && len > 1){

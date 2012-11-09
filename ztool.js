@@ -102,3 +102,6 @@ exports.writeFileSync = function(fileName, data){
     fs.writeFileSync(fileName, data);
 }
 
+exports.friendlyJsonParse = function(jsonStr){
+    return Function('return ' + jsonStr)();
+}

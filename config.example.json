@@ -6,7 +6,6 @@
 	"cmds": {
 		"concat_compress_copy": "concat|compress|copy",
 		"concat_copy": "concat|copy",
-		"test": "concat_compress_copy|concat_copy",
 		"pickup_template": {
 			"root": "./templatepicker"
 		}
@@ -40,7 +39,7 @@
 				"js/ace.concat.js"
 			],
 			"target": "./"
-		}/*,
+		},
 		"concat_compress_copy": {
 			"cmd": "concat_compress_copy",
 			"source": [
@@ -55,6 +54,6 @@
 			"source": "css/",
 			"target": "css/",
 			"depends": "copy_js,concat_compress_copy"
-		}*/
+		}
 	}
 }
