@@ -16,13 +16,13 @@ var path = require('path'),
 
 var ztool = require(COMPLIER_ROOT + '/ztool.js');
 
-var config, cmds, tasks;
 
 /**
  * 读取用户配置并进行预处理
  * 
  */
 var readConfig = function(){
+	var config;
 	var fileName = process.argv[2];
 	if(!fileName){
 		throw 'config file must be specified';
@@ -40,14 +40,15 @@ var readConfig = function(){
 	if(!config.rules){
 		throw 'there is no rule in this config file';
 	}
+	return config;
 }
 
 /**
  * 初始化 compiler 的cmds
  * 合并用户配置和自定义的 cmd
  */
-var init = function(){
-	cmds = {};
+var init = function(config){
+	var cmds = {};
 	var list = fs.readdirSync(COMPLIER_ROOT + '/cmds');
 	for(var i = 0, item; item = list[i]; i++) {
 		cmds[item] = {
@@ -73,6 +74,7 @@ var init = function(){
 	//创建个临时目录
 	ztool.mkdirsSync(COMPLIER_TEMP);
 	// console.log(config);
+	return cmds;
 }
 
 var makePathArray = function(arr, root){
@@ -85,7 +87,7 @@ var makePathArray = function(arr, root){
 	return arr;
 }
 
-var analyseCmd = function(cmd){
+var analyseCmd = function(cmds, cmd){
 	var result = [];
 	var arr = cmd.replace(/\s+/g, '').split('|');
 	for(var i = 0; i < arr.length; i++){
@@ -105,8 +107,8 @@ var analyseCmd = function(cmd){
 /**
  * 分析每条规则并创建任务
  */
-var createTasks = function(){
-	tasks = [];
+var createTasks = function(config, cmds){
+	var tasks = [];
 	var task, rule, cmd;
 	for(var r in config.rules){
 		rule = config.rules[r];
@@ -114,8 +116,8 @@ var createTasks = function(){
 			target = path.join(config.targetRoot, rule.target);// makePathArray(rule.target, config.targetRoot);
 		//处理用管道串起来的多个命令
 		cmd = rule.cmd || config.defaultCmd;
-		var rCmds = analyseCmd(cmd);
-		console.log(rCmds);
+		var rCmds = analyseCmd(cmds, cmd);
+		// console.log(rCmds);
 		var len = rCmds.length;
 		var params = rule.params || {};
 		if(!ztool.isArray(params) && len > 1){
@@ -163,13 +165,23 @@ var createTasks = function(){
 			source = target;
 		}
 	}
-	console.dir(tasks);
+	// console.dir(tasks);
+	return tasks;
 }
 /**
  * 执行所有任务
  */
-var execTasks = function(){
-	
+var execTasks = function(config, cmds, tasks){
+	// console.log(cmds);
+	for(var i = 0, task, cmd; task = tasks[i]; i++) {
+	    if(task.subs){
+	    	//多个子任务
+	    }else{
+	    	cmd = cmds[task.cmd];
+	    	console.log(cmd);
+	    	require(cmd.root).execute(task);
+	    }
+	}
 }
 /**
  * 执行完所有任务后的清理工作
@@ -180,8 +192,11 @@ var clean = function(){
 
 //************ 下面是主流程 ************************************
 var compile = function(){
-
-	readConfig(), init(), createTasks(), execTasks(), clean();
+	var config = readConfig();
+	var cmds = init(config);
+	var tasks = createTasks(config, cmds);
+	execTasks(config, cmds, tasks);
+	clean();
 }
 compile();
 

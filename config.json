@@ -12,28 +12,28 @@
 		}
 	},
 	"rules": {
-		"translate_index": {
-			"cmd": "concat|copy",
-			"source": "",
-			"target": "",
-			"params": []
-		},
-		"concat_js": {
-			"cmd": "concat",
-			"source": [
-				"js/ace/ace.js",
-				"js/ace/mode-javascript.js",
-				"js/ace/theme-tumblr.js"
-			],
-			"target": "js/ace.concat.js"
-		},
-		"compress_js": {
-			"cmd": "compress",
-			"source": [
-				"js/ace.concat.js"
-			],
-			"target": "./"
-		},
+		// "translate_index": {
+		// 	"cmd": "concat|copy",
+		// 	"source": "",
+		// 	"target": "",
+		// 	"params": []
+		// },
+		// "concat_js": {
+		// 	"cmd": "concat",
+		// 	"source": [
+		// 		"js/ace/ace.js",
+		// 		"js/ace/mode-javascript.js",
+		// 		"js/ace/theme-tumblr.js"
+		// 	],
+		// 	"target": "js/ace.concat.js"
+		// },
+		// "compress_js": {
+		// 	"cmd": "compress",
+		// 	"source": [
+		// 		"js/ace.concat.js"
+		// 	],
+		// 	"target": "./"
+		// },
 		"copy_js": {
 			"cmd": "copy",
 			"source": [
