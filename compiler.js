@@ -40,6 +40,7 @@ var readConfig = function(){
 	if(!config.rules){
 		throw 'there is no rule in this config file';
 	}
+
 	return config;
 }
 
@@ -71,6 +72,9 @@ var init = function(config){
 		}
 	}
 	config.cmds = cmds;
+	config.sourceRoot = path.resolve(config.sourceRoot);
+	config.targetRoot = path.resolve(config.targetRoot);
+	ztool.mkdirsSync(config.targetRoot);
 	//创建个临时目录
 	ztool.mkdirsSync(COMPLIER_TEMP);
 	// console.log(config);
@@ -178,8 +182,8 @@ var execTasks = function(config, cmds, tasks){
 	    	//多个子任务
 	    }else{
 	    	cmd = cmds[task.cmd];
-	    	console.log(cmd);
-	    	require(cmd.root).execute(task);
+	    	console.log('executing ' + task.cmd + '...');
+	    	require(cmd.root).execute(task, config);
 	    }
 	}
 }

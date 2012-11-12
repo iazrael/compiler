@@ -1,6 +1,6 @@
 {
-	"sourceRoot": "./",
-	"targetRoot": "./build",
+	"sourceRoot": "./test/",
+	"targetRoot": "./test/build",
 	"fileFormat": "js,css,html,htm,png,gif,jpg,jpeg",
 	"debug": true,
 	"cmds": {
@@ -37,7 +37,7 @@
 		"copy_js": {
 			"cmd": "copy",
 			"source": [
-				"js/ace.concat.js"
+				"js/"
 			],
 			"target": "./"
 		}/*,
