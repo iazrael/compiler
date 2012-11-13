@@ -5,27 +5,27 @@ var nf = require('node-file');
 
 
 exports.execute = function(task, config){
-	var s, files;
+	var src, files;
 	for (var i = 0; i < task.source.length; i++) {
-		s = task.source[i].trim();
-		if(!s){
+		src = task.source[i].trim();
+		if(!src){
 			continue;
 		}
-		if(fs.statSync(s).isFile()){
-			nf.copyFileSync(s, task.target, true)
+		if(fs.statSync(src).isFile()){
+			nf.copyFileSync(src, task.target, true)
 		}else{
 			var type = false;
 			if(config.fileFormat){
 				type = config.fileFormat.join(',');
 				// type = 'css';
 			} 
-			files = nf.listFilesSync(s, type, true);
-			// console.log(s);
+			files = nf.listFilesSync(src, type, true);
+			// console.log(src);
 			// console.log(files);
-			for (var j = 0, f; j < files.length; j++) {
-				f = path.join(task.target, files[j].replace(s,''));
-				console.log(f);
-				nf.copyFileSync(files[j], f, true);
+			for (var j = 0, target; j < files.length; j++) {
+				target = path.join(task.target, files[j].replace(src,''));
+				// console.log(target);
+				nf.copyFileSync(files[j], target, true);
 			};
 		}
 	}

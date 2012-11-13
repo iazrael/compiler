@@ -75,8 +75,10 @@ var init = function(config){
 	config.sourceRoot = path.resolve(config.sourceRoot);
 	config.targetRoot = path.resolve(config.targetRoot);
 	// console.log(config.targetRoot);
+	nf.rmdirsSync(config.targetRoot);
 	nf.mkdirsSync(config.targetRoot);
 	//创建个临时目录
+	nf.rmdirsSync(COMPLIER_TEMP)
 	nf.mkdirsSync(COMPLIER_TEMP);
 	// console.log(config);
 	return cmds;
