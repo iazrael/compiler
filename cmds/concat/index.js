@@ -4,16 +4,15 @@ var fs = require('fs'),
 var nf = require('node-file');
 
 exports.execute = function(task, config){
-	var src, files;
+	var src, files, content = '';
+	
 	for (var i = 0; i < task.source.length; i++) {
 		src = task.source[i].trim();
 		if(!src){
 			continue;
 		}
-		//TODO
-		if(fs.statSync(src).isFile()){
-			// nf.copyFileSync(src, task.target, true)
-		}else{
+		
+		if(fs.statSync(src).isDirectory()){
 			var type = false;
 			if(config.fileFormat){
 				type = config.fileFormat.join(',');
@@ -22,12 +21,13 @@ exports.execute = function(task, config){
 			files = nf.listFilesSync(src, type, true);
 			// console.log(src);
 			// console.log(files);
-			// for (var j = 0, target; j < files.length; j++) {
-			// 	target = path.join(task.target, files[j].replace(src,''));
-			// 	// console.log(target);
-			// 	nf.copyFileSync(files[j], target, true);
-			// };
+			for (var j = 0, source; j < files.length; j++) {
+				source = path.join(src, files[j]);
+				content += fs.readFileSync(source).toString();
+			};
+		}else{
+			content += fs.readFileSync(src).toString();
 		}
 	}
-	
+	nf.writeFileSync(task.target, content);
 }

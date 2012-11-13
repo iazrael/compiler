@@ -12,7 +12,7 @@ exports.execute = function(task, config){
 			continue;
 		}
 		if(fs.statSync(src).isFile()){
-			nf.copyFileSync(src, task.target, true)
+			nf.copyFileSync(src, task.target, true);
 		}else{
 			var type = false;
 			if(config.fileFormat){
@@ -22,10 +22,11 @@ exports.execute = function(task, config){
 			files = nf.listFilesSync(src, type, true);
 			// console.log(src);
 			// console.log(files);
-			for (var j = 0, target; j < files.length; j++) {
-				target = path.join(task.target, files[j].replace(src,''));
-				// console.log(target);
-				nf.copyFileSync(files[j], target, true);
+			for (var j = 0, target, source; j < files.length; j++) {
+				target = path.join(task.target, files[j]);
+				source = path.join(src, files[j]);
+				// console.log('>>', source, target);
+				nf.copyFileSync(source, target, true);
 			};
 		}
 	}

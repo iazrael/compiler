@@ -18,22 +18,25 @@
 		// 	"target": "",
 		// 	"params": []
 		// },
-		"concat_js": {
-			"cmd": "concat",
-			"source": [
-				"js/ace/ace.js",
-				"js/ace/mode-javascript.js",
-				"js/ace/theme-tumblr.js"
-			],
-			"target": "js/ace.concat.js"
-		},
-		// "compress_js": {
-		// 	"cmd": "compress",
+		// "concat_js": {
+		// 	"cmd": "concat",
 		// 	"source": [
-		// 		"js/ace.concat.js"
+		// 		"js/jx/jx.console.js",
+		// 		"js/jx/jx.cookie.js",
+		// 		// "js/site/"
+		// 		// "js/ace/ace.js",
+		// 		// "js/ace/mode-javascript.js",
+		// 		// "js/ace/theme-tumblr.js"
 		// 	],
-		// 	"target": "./"
+		// 	"target": "js/ace.concat.js"
 		// },
+		"compress_js": {
+			"cmd": "compress",
+			"source": [
+				"js/ranking.js"
+			],
+			"target": "./"
+		},
 		// "copy_js": {
 		// 	"cmd": "copy",
 		// 	"source": [
