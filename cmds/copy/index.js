@@ -1,4 +1,6 @@
-var fs = require('fs');
+var fs = require('fs'),
+	path = require('path')
+	;
 var nf = require('node-file');
 
 
@@ -18,8 +20,12 @@ exports.execute = function(task, config){
 				// type = 'css';
 			} 
 			files = nf.listFilesSync(s, type, true);
-			for (var j = 0; j < files.length; j++) {
-				nf.copyFileSync(files[j], task.target, true);
+			// console.log(s);
+			// console.log(files);
+			for (var j = 0, f; j < files.length; j++) {
+				f = path.join(task.target, files[j].replace(s,''));
+				console.log(f);
+				nf.copyFileSync(files[j], f, true);
 			};
 		}
 	}

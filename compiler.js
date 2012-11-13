@@ -15,7 +15,7 @@ var path = require('path'),
 	fs = require('fs');
 
 var ztool = require(COMPLIER_ROOT + '/ztool.js');
-
+var nf = require('node-file');
 
 /**
  * 读取用户配置并进行预处理
@@ -53,7 +53,7 @@ var init = function(config){
 	var list = fs.readdirSync(COMPLIER_ROOT + '/cmds');
 	for(var i = 0, item; item = list[i]; i++) {
 		cmds[item] = {
-			"root": COMPLIER_ROOT + '/cmds/' + item
+			"root": path.join(COMPLIER_ROOT , 'cmds' , item)
 		}
 	}
 	// console.log(cmds);
@@ -74,9 +74,10 @@ var init = function(config){
 	config.cmds = cmds;
 	config.sourceRoot = path.resolve(config.sourceRoot);
 	config.targetRoot = path.resolve(config.targetRoot);
-	ztool.mkdirsSync(config.targetRoot);
+	// console.log(config.targetRoot);
+	nf.mkdirsSync(config.targetRoot);
 	//创建个临时目录
-	ztool.mkdirsSync(COMPLIER_TEMP);
+	nf.mkdirsSync(COMPLIER_TEMP);
 	// console.log(config);
 	return cmds;
 }
