@@ -186,7 +186,7 @@ var execTasks = function(config, cmds, tasks){
 	    }else{
 	    	cmd = cmds[task.cmd];
 	    	console.log('executing ' + task.id + '...');
-	    	require(cmd.root).execute(task, config);
+	    	require(cmd.root).execute(task, config, cmd.root);
 	    }
 	}
 }
