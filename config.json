@@ -18,15 +18,15 @@
 		// 	"target": "",
 		// 	"params": []
 		// },
-		// "concat_js": {
-		// 	"cmd": "concat",
-		// 	"source": [
-		// 		"js/ace/ace.js",
-		// 		"js/ace/mode-javascript.js",
-		// 		"js/ace/theme-tumblr.js"
-		// 	],
-		// 	"target": "js/ace.concat.js"
-		// },
+		"concat_js": {
+			"cmd": "concat",
+			"source": [
+				"js/ace/ace.js",
+				"js/ace/mode-javascript.js",
+				"js/ace/theme-tumblr.js"
+			],
+			"target": "js/ace.concat.js"
+		},
 		// "compress_js": {
 		// 	"cmd": "compress",
 		// 	"source": [
@@ -34,13 +34,14 @@
 		// 	],
 		// 	"target": "./"
 		// },
-		"copy_js": {
-			"cmd": "copy",
-			"source": [
-				"js/"
-			],
-			"target": "./"
-		}/*,
+		// "copy_js": {
+		// 	"cmd": "copy",
+		// 	"source": [
+		// 		"js/"
+		// 	],
+		// 	"target": "./"
+		// }
+		/*,
 		"concat_compress_copy": {
 			"cmd": "concat_compress_copy",
 			"source": [

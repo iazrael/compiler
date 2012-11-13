@@ -185,7 +185,7 @@ var execTasks = function(config, cmds, tasks){
 	    	//多个子任务
 	    }else{
 	    	cmd = cmds[task.cmd];
-	    	console.log('executing ' + task.cmd + '...');
+	    	console.log('executing ' + task.id + '...');
 	    	require(cmd.root).execute(task, config);
 	    }
 	}
