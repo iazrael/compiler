@@ -78,7 +78,7 @@ var init = function(config){
 	nf.rmdirsSync(config.targetRoot);
 	nf.mkdirsSync(config.targetRoot);
 	//创建个临时目录
-	nf.rmdirsSync(COMPLIER_TEMP)
+	nf.rmdirsSync(COMPLIER_TEMP);
 	nf.mkdirsSync(COMPLIER_TEMP);
 	// console.log(config);
 	return cmds;
@@ -186,7 +186,12 @@ var execTasks = function(config, cmds, tasks){
 	    }else{
 	    	cmd = cmds[task.cmd];
 	    	console.log('executing ' + task.id + '...');
-	    	require(cmd.root).execute(task, config, cmd.root);
+	    	var runOptions = {
+	    		compilerRoot: COMPLIER_ROOT,
+	    		dirname: cmd.root,
+	    		filename: path.join(cmd.root, 'index.js')
+	    	};
+	    	require(cmd.root).execute(task, config, runOptions);
 	    }
 	}
 }
@@ -194,7 +199,7 @@ var execTasks = function(config, cmds, tasks){
  * 执行完所有任务后的清理工作
  */
 var clean = function(){
-	
+	nf.rmdirsSync(COMPLIER_TEMP);
 }
 
 //************ 下面是主流程 ************************************

@@ -33,9 +33,13 @@
 		"compress_js": {
 			"cmd": "compress",
 			"source": [
-				"js/ranking.js"
+				"style/"
+				// "js/ranking.js"
 			],
-			"target": "./"
+			"target": "./",//compress 插件要求，target如果是目录，必须加上 “/”
+			"params":{
+				"fileFormat": "css"
+			}
 		},
 		// "copy_js": {
 		// 	"cmd": "copy",

@@ -1,28 +1,23 @@
 var fs = require('fs'),
 	path = require('path'),
-	exec = require('child_process').exec
+	uglifyJS = require("uglify-js2"),
+	cleanCSS = require('clean-css')
 	;
 var nf = require('node-file');
 
-var LIB = 'lib';
-var ROOT;
+var options, ztool;
 
 var compressJs = function(src, target){
-	//TODO 这里是异步的,看看怎么处理好
-	var cmd = "java -jar " + path.join(ROOT, LIB, 'compiler.jar') 
-		+ " --charset utf-8" 
-		+ " --js='" + src + "'"
-		+ " --js_output_file='" + target + "'"
-		;
-	console.log(cmd);
-	var child = exec(cmd);
-	for (var i = 0; i < 200; i++) {
-		console.log('log-',i);
-	}
+	var result = uglifyJS.minify(src);
+	
+	nf.writeFileSync(target, result.code);
 }	
 
 var compressCss = function(src, target){
-	
+	var file = fs.readFileSync(src);
+	var content = file.toString();
+	var result = cleanCSS.process(content);
+	nf.writeFileSync(target, result);
 }
 
 var compress = function(src, target){
@@ -37,9 +32,11 @@ var compress = function(src, target){
 }
 
 
-exports.execute = function(task, config, selfRoot){
-	var src, files;
-	ROOT = selfRoot;
+exports.execute = function(task, config, runOptions){
+	var src, files, target;
+	options = runOptions;
+	ztool = require(path.join(options.compilerRoot, 'ztool.js'));
+	var params = task.params || {};
 	for (var i = 0; i < task.source.length; i++) {
 		src = task.source[i].trim();
 		if(!src){
@@ -47,22 +44,29 @@ exports.execute = function(task, config, selfRoot){
 		}
 		//
 		if(fs.statSync(src).isDirectory()){
-			var type = false;
-			if(config.fileFormat){
-				type = config.fileFormat.join(',');
-				// type = 'css';
+			var type = "js,css";
+			if(params.fileFormat){
+				type = params.fileFormat;
 			} 
+			// console.log(type);
 			files = nf.listFilesSync(src, type, true);
 			// console.log(src);
 			// console.log(files);
-			for (var j = 0, source, target; j < files.length; j++) {
+			for (var j = 0, source; j < files.length; j++) {
 				source = path.join(src, files[j]);
 				target = path.join(task.target, files[j]);
+				if(ztool.endsWith(target, path.sep)){
+					target = path.join(target, path.basename(src));
+				}
 				compress(source, target);
 				
 			}
 		}else{
-			compress(src, task.target);
+			target = task.target;
+			if(ztool.endsWith(target, path.sep)){
+				target = path.join(target, path.basename(src));
+			}
+			compress(src, target);
 		}
 	}
 }
