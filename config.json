@@ -57,12 +57,11 @@
 				"js/ace/theme-tumblr.js"
 			],
 			"target": "js/ace.concat.js"
-		},
-		"spriter": {
+		},*/
+		"ispriter": {
 			"cmd": "ispriter",
-			"source": "css/",
-			"target": "css/",
-			"depends": "copy_js,concat_compress_copy"
-		}*/
+			"source": "style/",
+			"target": "style/"
+		}
 	}
 }
