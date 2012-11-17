@@ -30,17 +30,17 @@
 		// 	],
 		// 	"target": "js/ace.concat.js"
 		// },
-		"compress_js": {
-			"cmd": "compress",
-			"source": [
-				"style/"
-				// "js/ranking.js"
-			],
-			"target": "./",//compress 插件要求，target如果是目录，必须加上 “/”
-			"params":{
-				"fileFormat": "css"
-			}
-		},
+		// "compress_js": {
+		// 	"cmd": "compress",
+		// 	"source": [
+		// 		"style/"
+		// 		// "js/ranking.js"
+		// 	],
+		// 	"target": "./",//compress 插件要求，target如果是目录，必须加上 “/”
+		// 	"params":{
+		// 		"fileFormat": "css"
+		// 	}
+		// },
 		// "copy_js": {
 		// 	"cmd": "copy",
 		// 	"source": [

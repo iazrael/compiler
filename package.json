@@ -12,7 +12,10 @@
   "engines": {
     "node": "0.8"
   },
-  "dependencies": {},
+  "dependencies": {
+    "uglify-js2": "*",
+    "clean-css": "*"
+  },
   "devDependencies": {},
   "optionalDependencies": {}
 }
