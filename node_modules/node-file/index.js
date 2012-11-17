@@ -40,6 +40,7 @@ var rmdirsSync = function(dirpath){
     // console.log(dirs);
     var dir, len = dirs.length;
     if(len === 0){
+        fs.rmdirSync(dirpath);
         return;
     }
     for(var i = 0; i < len; i++) {
@@ -47,11 +48,12 @@ var rmdirsSync = function(dirpath){
         // console.log(dir);
         if(fs.statSync(dir).isDirectory()){
             rmdirsSync(dir);
-            fs.rmdirSync(dir);
+            // fs.rmdirSync(dir);
         }else{
             fs.unlinkSync(dir);
         }
     }
+    fs.rmdirSync(dirpath);
 }
 
 /**

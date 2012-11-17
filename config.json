@@ -48,20 +48,20 @@
 		// 	],
 		// 	"target": "./"
 		// }
-		/*,
+		
 		"concat_compress_copy": {
-			"cmd": "concat_compress_copy",
+			"cmd": "compress|concat",
 			"source": [
-				"js/ace/ace.js",
-				"js/ace/mode-javascript.js",
-				"js/ace/theme-tumblr.js"
+				"js/jx/jx.string.js",
+				"js/qtool.js",
+				"js/ranking.js"
 			],
-			"target": "js/ace.concat.js"
-		},*/
-		"ispriter": {
-			"cmd": "ispriter",
-			"source": "style/",
-			"target": "style/"
+			"target": "js/all.js"
 		}
+		// "ispriter": {
+		// 	"cmd": "ispriter",
+		// 	"source": "style/",
+		// 	"target": "style/"
+		// }
 	}
 }

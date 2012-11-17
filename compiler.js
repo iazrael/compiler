@@ -157,6 +157,7 @@ var createTasks = function(config, cmds){
 		for(var i = 0, sub; cmd = rCmds[i]; i++) {
 		    sub = {
 		    	id: task.id + '.' + cmd,
+		    	cmd: cmd,
 		    	params: params[i]
 		    }
 		    task.subs.push(sub);
@@ -164,12 +165,12 @@ var createTasks = function(config, cmds){
 		    	//最后一个命令, 指定其输出 target
 				target = task.target;
 			}else{
-				target = path.join(COMPLIER_TEMP, sub.id);
+				target = path.join(COMPLIER_TEMP, sub.id, path.sep);
 			}
 			sub.source = source;
 			sub.target = target;
 			//上一个命令的输出是下一个命令的输入
-			source = target;
+			source = [target];
 		}
 	}
 	// console.dir(tasks);
@@ -183,6 +184,17 @@ var execTasks = function(config, cmds, tasks){
 	for(var i = 0, task, cmd; task = tasks[i]; i++) {
 	    if(task.subs){
 	    	//多个子任务
+	    	// console.log(task);
+	    	for(var i = 0, subTask; subTask = task.subs[i]; i++) {
+	    	    cmd = cmds[subTask.cmd];
+		    	console.log('executing ' + subTask.id + '...');
+		    	var runOptions = {
+		    		compilerRoot: COMPLIER_ROOT,
+		    		dirname: cmd.root,
+		    		filename: path.join(cmd.root, 'index.js')
+		    	};
+		    	require(cmd.root).execute(subTask, config, runOptions);
+	    	}
 	    }else{
 	    	cmd = cmds[task.cmd];
 	    	console.log('executing ' + task.id + '...');

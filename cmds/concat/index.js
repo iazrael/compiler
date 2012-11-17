@@ -5,7 +5,6 @@ var nf = require('node-file');
 
 exports.execute = function(task, config){
 	var src, files, content = '';
-	
 	for (var i = 0; i < task.source.length; i++) {
 		src = task.source[i].trim();
 		if(!src){
