@@ -1,9 +1,7 @@
 var fs = require('fs'),
 	path = require('path')
 	;
-// var ispriter = require('ispriter');
-var ispriter = require('/Users/azrael/Desktop/Web Projects/ispriter/');
-
+var ispriter = require('ispriter');
 
 exports.execute = function(task, config){
 	var src;
