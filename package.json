@@ -2,7 +2,7 @@
   "author": "azrael <azrael@imatlas.com> (http://imatlas.com/about)",
   "name": "compiler",
   "description": "a web compile tool",
-  "version": "0.1",
+  "version": "0.1.0",
   "homepage": "",
   "repository": {
     "type": "git",
@@ -10,7 +10,7 @@
   },
   "main": "./compiler.js",
   "engines": {
-    "node": "0.8"
+    "node": "*"
   },
   "dependencies": {
     "uglify-js2": "*",

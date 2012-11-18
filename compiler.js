@@ -1,4 +1,4 @@
-#! /usr/local/bin/node
+#!/usr/bin/env node
 
 var COMPLIER_ROOT = __dirname;
 
@@ -32,7 +32,7 @@ var readConfig = function(){
 
 	var content = fs.readFileSync(fileName);
 	try{
-		config = ztool.friendlyJsonParse(content);
+		config = ztool.jsonParse(content);
 	}catch(e){
 		throw 'the config file is not a json file';
 	}
