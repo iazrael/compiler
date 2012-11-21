@@ -21,9 +21,9 @@ var nf = require('node-file');
  * 读取用户配置并进行预处理
  * 
  */
-var readConfig = function(){
+var readConfig = function(fileName){
 	var config;
-	var fileName = process.argv[2];
+	
 	if(!fileName){
 		throw 'config file must be specified';
 	}else if(!fs.existsSync(fileName)){
@@ -215,14 +215,21 @@ var clean = function(){
 }
 
 //************ 下面是主流程 ************************************
-var compile = function(){
-	var config = readConfig();
+var compile = function(fileName){
+	var config = readConfig(fileName);
 	var cmds = init(config);
 	var tasks = createTasks(config, cmds);
 	execTasks(config, cmds, tasks);
 	clean();
 }
-compile();
+
+if(process.argv.length < 2){
+	//非命令行启动，而是 js 的require
+	exports.compile = compile;
+}else{
+	compile(process.argv[2]);
+}
+
 
 
 

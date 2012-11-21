@@ -3,33 +3,65 @@ var fs = require('fs'),
 
 var toString = Object.prototype.toString;
 
-exports.is = function(type, obj) {
+var is = exports.is = function(type, obj) {
     var clas = toString.call(obj).slice(8, -1);
     return obj !== undefined && obj !== null && clas === type;
 }
 
-exports.isString = function(obj){
+var isString = exports.isString = function(obj){
     return toString.call(obj) === '[object String]';
 }
 
-exports.isArray = Array.isArray || function(obj){
+var isArray = exports.isArray = Array.isArray || function(obj){
     return toString.call(obj) === '[object Array]';
 }
 
-exports.isArguments = function(obj){
+var isArguments = exports.isArguments = function(obj){
     return toString.call(obj) === '[object Arguments]';
 }
 
-exports.isObject = function(obj){
+var isObject = exports.isObject = function(obj){
     return toString.call(obj) === '[object Object]';
 }
 
-exports.isFunction = function(obj){
+var isFunction = exports.isFunction = function(obj){
     return toString.call(obj) === '[object Function]';
 }
 
-exports.isUndefined = function(obj){
+var isUndefined = exports.isUndefined = function(obj){
     return toString.call(obj) === '[object Undefined]';
+}
+
+/**
+ * 合并几个对象并返回 baseObj,
+ * 如果 extendObj 有数组属性, 则直接拷贝引用
+ * @param {Object} baseObj 基础对象
+ * @param {Object} extendObj ... 
+ * 
+ * @return {Object} baseObj
+ * 
+ **/
+var merge = exports.merge = function(baseObj, extendObj1, extendObj2/*, extnedObj3...*/){
+    var argu = arguments;
+    var extendObj;
+    for(var i = 1; i < argu.length; i++){
+        extendObj = argu[i];
+        for(var j in extendObj){
+            if(isArray(extendObj[j])){
+                baseObj[j] = extendObj[j].concat();
+            }else if(isObject(extendObj[j])){
+                if(baseObj[j] && isArray(baseObj[j])){
+                //避免给数组做 merge
+                    baseObj[j] = merge({}, extendObj[j]);
+                }else{
+                    baseObj[j] = merge({}, baseObj[j], extendObj[j]);
+                }
+            }else{
+                baseObj[j] = extendObj[j];
+            }
+        }
+    }
+    return baseObj;
 }
 
 exports.endsWith = function(str, end){
