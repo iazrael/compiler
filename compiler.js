@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
-var COMPLIER_ROOT = __dirname;
+var COMPILER_ROOT = __dirname;
 
-var COMPLIER_TEMP = './compiler.temp';
+var COMPILER_TEMP = './compiler.temp';
 
 var DEFAULT_CONFIG = {
 	"sourceRoot": "./",
@@ -12,10 +12,12 @@ var DEFAULT_CONFIG = {
 };
 
 var path = require('path'),
-	fs = require('fs');
+	fs = require('fs'),
+	nf = require('node-file');
 
-var ztool = require(COMPLIER_ROOT + '/ztool.js');
-var nf = require('node-file');
+var ztool = require(COMPILER_ROOT + '/ztool.js');
+
+var compileConfig, compileCmds, compileTaskList;
 
 /**
  * 读取用户配置并进行预处理
@@ -48,28 +50,21 @@ var readConfig = function(fileName){
  * 初始化 compiler 的cmds
  * 合并用户配置和自定义的 cmd
  */
-var init = function(config){
+var init = function(){
+	var config = compileConfig;
 	var cmds = {};
-	var list = fs.readdirSync(COMPLIER_ROOT + '/cmds');
+	var list = fs.readdirSync(COMPILER_ROOT + '/cmds');
 	for(var i = 0, item; item = list[i]; i++) {
 		cmds[item] = {
-			"root": path.join(COMPLIER_ROOT , 'cmds' , item)
+			"root": path.join(COMPILER_ROOT , 'cmds' , item)
 		}
 	}
 	// console.log(cmds);
-	for(var d in DEFAULT_CONFIG){
-		if(!config[d]){
-			config[d] = DEFAULT_CONFIG[d];
-		}
-		if(d === 'fileFormat'){
-			var format = config[d].replace(/\s+/g, '');
-			config[d] = format.split(',');
-		}
-	}
+	config = ztool.merge({}, DEFAULT_CONFIG, config);
+
 	if(config.cmds){//合并命令
-		for(var m in config.cmds){
-			cmds[m] = config.cmds[m];
-		}
+		cmds = ztool.merge({}, cmds, config.cmds);
+		//TODO 先展开简写的命令
 	}
 	config.cmds = cmds;
 	config.sourceRoot = path.resolve(config.sourceRoot);
@@ -78,8 +73,8 @@ var init = function(config){
 	nf.rmdirsSync(config.targetRoot);
 	nf.mkdirsSync(config.targetRoot);
 	//创建个临时目录
-	nf.rmdirsSync(COMPLIER_TEMP);
-	nf.mkdirsSync(COMPLIER_TEMP);
+	nf.rmdirsSync(COMPILER_TEMP);
+	nf.mkdirsSync(COMPILER_TEMP);
 	// console.log(config);
 	return cmds;
 }
@@ -94,19 +89,42 @@ var makePathArray = function(arr, root){
 	return arr;
 }
 
-var analyseCmd = function(cmds, cmd){
+var expandCmd = function(cmd){
+	if(!ztool.isString(compileCmds[cmd])){
+		return cmd;
+	}
+	cmd = compileCmds[cmd];
+	var cmdArr = cmd.split('|');
+	if(cmdArr.length > 1){
+		for(var i = 0; i < cmdArr.length; i++){
+			cmdArr[i] = expandCmd(cmdArr[i]);
+		}
+	}
+	return cmd;
+}
+
+var analyseCmd = function(cmd){
 	var result = [];
-	var arr = cmd.replace(/\s+/g, '').split('|');
-	for(var i = 0; i < arr.length; i++){
-		cmd = arr[i];
-		if(!cmds[cmd]){
-			throw 'the cmd "' + cmd + '" is not exists. ';
-		}
-		if(ztool.isString(cmds[cmd])){
-			result = result.concat(analyseCmd(cmds[cmd]))
-		}else{
-			result.push(cmd);
-		}
+	//先把嵌套的命令都展开
+	cmd = expandCmd(cmd);
+	var cmdArr = cmd.replace(/\s+/g, '').split('|');
+	var pcmdArr, pcmd, tcmd;
+	for(var i = 0; i < cmdArr.length; i++){
+		pcmdArr = cmdArr[i].split(',');
+		for (var j = 0; j < pcmdArr.length; j++) {
+			pcmd = pcmdArr[j];
+			tcmd = compileCmds[pcmd];
+			if(!tcmd){
+				throw 'the cmd "' + pcmd + '" is not exists. ';
+			}
+			//TODO
+			if(ztool.isString(tcmd)){
+				result = result.concat(analyseCmd(tcmd));
+			}
+		};
+		result.push(pcmd);
+
+		
 	}
 	return result;
 }
@@ -114,7 +132,9 @@ var analyseCmd = function(cmds, cmd){
 /**
  * 分析每条规则并创建任务
  */
-var createTasks = function(config, cmds){
+var createTasks = function(){
+	var config = compileConfig;
+	var cmds = compileCmds;
 	var tasks = [];
 	var task, rule, cmd;
 	for(var r in config.rules){
@@ -123,11 +143,15 @@ var createTasks = function(config, cmds){
 			target = path.join(config.targetRoot, rule.target);// makePathArray(rule.target, config.targetRoot);
 		//处理用管道串起来的多个命令
 		cmd = rule.cmd || config.defaultCmd;
-		var rCmds = analyseCmd(cmds, cmd);
+		var rCmds = analyseCmd(cmd);
 		// console.log(rCmds);
 		var len = rCmds.length;
 		var params = rule.params || {};
-		if(!ztool.isArray(params) && len > 1){
+		if(!len){
+			throw 'this rule " ' + r + '" don\'t have cmd . ';
+		}
+		//多个命令串联,单个命令也当成多个处理
+		if(!ztool.isArray(params)){
 			//如果传入的params 参数不是数组, 且命令不止一个
 			//就把params 都传入到所有命令
 			var arr = [];
@@ -136,42 +160,26 @@ var createTasks = function(config, cmds){
 			}
 			params = arr;
 		}
-		task = {
-			id: r,
-			params: params,
-			source: source,
-			target: target
-		};
-		tasks.push(task);
-		// console.log('rule:', rule);
-		if(len === 1){
-			cmd = rCmds[0];
-			if(!cmds[cmd]){
-		    	throw 'the cmd "' + cmd + '" is not exists. ' + r;
-		    }
-		    task.id = r + '.' + cmd;
-			task.cmd = cmd;
-			continue;
-		}
-		task.subs = [];
-		for(var i = 0, sub; cmd = rCmds[i]; i++) {
-		    sub = {
-		    	id: task.id + '.' + cmd,
+		var src = source, tar = target;
+		for(var i = 0; cmd = rCmds[i]; i++) {
+		    task = {
+		    	id: r + '.' + cmd,
 		    	cmd: cmd,
-		    	params: params[i]
+		    	params: params[i] || {}
 		    }
-		    task.subs.push(sub);
+		    tasks.push(task);
 		    if(i === len - 1){
 		    	//最后一个命令, 指定其输出 target
-				target = task.target;
+				tar = target;
 			}else{
-				target = path.join(COMPLIER_TEMP, sub.id, path.sep);
+				tar = path.join(COMPILER_TEMP, task.id, path.sep);
 			}
-			sub.source = source;
-			sub.target = target;
+			task.source = src;
+			task.target = tar;
 			//上一个命令的输出是下一个命令的输入
-			source = [target];
+			src = [tar];
 		}
+
 	}
 	// console.dir(tasks);
 	return tasks;
@@ -179,48 +187,39 @@ var createTasks = function(config, cmds){
 /**
  * 执行所有任务
  */
-var execTasks = function(config, cmds, tasks){
-	// console.log(cmds);
+var execTasks = function(){
+	var config = compileConfig, 
+		cmds = compileCmds, 
+		tasks = compileTaskList;
+	// console.log(JSON.stringify(tasks));
+	// return;
 	for(var i = 0, task, cmd; task = tasks[i]; i++) {
-	    if(task.subs){
-	    	//多个子任务
-	    	// console.log(task);
-	    	for(var i = 0, subTask; subTask = task.subs[i]; i++) {
-	    	    cmd = cmds[subTask.cmd];
-		    	console.log('executing ' + subTask.id + '...');
-		    	var runOptions = {
-		    		compilerRoot: COMPLIER_ROOT,
-		    		dirname: cmd.root,
-		    		filename: path.join(cmd.root, 'index.js')
-		    	};
-		    	require(cmd.root).execute(subTask, config, runOptions);
-	    	}
-	    }else{
-	    	cmd = cmds[task.cmd];
-	    	console.log('executing ' + task.id + '...');
-	    	var runOptions = {
-	    		compilerRoot: COMPLIER_ROOT,
-	    		dirname: cmd.root,
-	    		filename: path.join(cmd.root, 'index.js')
-	    	};
-	    	require(cmd.root).execute(task, config, runOptions);
-	    }
+    	cmd = cmds[task.cmd];
+    	console.log('>>exec ' + task.id + '...');
+    	var runOptions = {
+    		compilerRoot: COMPILER_ROOT,
+    		dirname: cmd.root,
+    		filename: path.join(cmd.root, 'index.js')
+    	};
+    	require(cmd.root).execute(task, config, runOptions);
 	}
 }
 /**
  * 执行完所有任务后的清理工作
  */
 var clean = function(){
-	nf.rmdirsSync(COMPLIER_TEMP);
+	// nf.rmdirsSync(COMPILER_TEMP);
 }
 
 //************ 下面是主流程 ************************************
 var compile = function(fileName){
-	var config = readConfig(fileName);
-	var cmds = init(config);
-	var tasks = createTasks(config, cmds);
-	execTasks(config, cmds, tasks);
+	var start = new Date();
+	compileConfig = readConfig(fileName);
+	compileCmds = init();
+	compileTaskList = createTasks();
+	execTasks();
 	clean();
+	console.log('time consume:' + (new Date() - start) + 'ms.');
 }
 
 if(process.argv.length < 2){
