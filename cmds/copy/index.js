@@ -14,11 +14,8 @@ exports.execute = function(task, config){
 		if(fs.statSync(src).isFile()){
 			nf.copyFileSync(src, task.target, true);
 		}else{
-			var type = false;
-			if(config.fileFormat){
-				type = config.fileFormat.join(',');
-				// type = 'css';
-			} 
+			var type = task.params.fileFormat || config.fileFormat || false;
+			
 			files = nf.listFilesSync(src, type, true);
 			// console.log(src);
 			// console.log(files);

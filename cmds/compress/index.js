@@ -44,7 +44,7 @@ exports.execute = function(task, config, runOptions){
 		}
 		//
 		if(fs.statSync(src).isDirectory()){
-			var type = "js,css";
+			var type = 'js,css';
 			if(params.fileFormat){
 				type = params.fileFormat;
 			} 
