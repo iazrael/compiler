@@ -2,7 +2,9 @@
 
 var COMPILER_ROOT = __dirname;
 
-var COMPILER_TEMP = './compiler.temp';
+var COMPILER_TEMP = './compiler.temp/';
+
+var CMD_ROOT = './cmds/';
 
 var DEFAULT_CONFIG = {
 	"sourceRoot": "./",
@@ -42,7 +44,7 @@ var readConfig = function(fileName){
 	if(!config.rules){
 		throw 'there is no rule in this config file';
 	}
-
+	compileConfig = config;
 	return config;
 }
 
@@ -52,21 +54,18 @@ var readConfig = function(fileName){
  */
 var init = function(){
 	var config = compileConfig;
-	var cmds = {};
-	var list = fs.readdirSync(COMPILER_ROOT + '/cmds');
-	for(var i = 0, item; item = list[i]; i++) {
-		cmds[item] = {
-			"root": path.join(COMPILER_ROOT , 'cmds' , item)
-		}
-	}
+	compileCmds = prepareSysCmds();
 	// console.log(cmds);
 	config = ztool.merge({}, DEFAULT_CONFIG, config);
 
 	if(config.cmds){//合并命令
-		cmds = ztool.merge({}, cmds, config.cmds);
-		//TODO 先展开简写的命令
+		compileCmds = ztool.merge({}, compileCmds, config.cmds);
+		// 先展开简写的命令
+		compileCmds = expandCmds(compileCmds);
+		// console.log(JSON.stringify(compileCmds));
+		// console.log(compileCmds);
 	}
-	config.cmds = cmds;
+	config.cmds = compileCmds;
 	config.sourceRoot = path.resolve(config.sourceRoot);
 	config.targetRoot = path.resolve(config.targetRoot);
 	// console.log(config.targetRoot);
@@ -76,7 +75,66 @@ var init = function(){
 	nf.rmdirsSync(COMPILER_TEMP);
 	nf.mkdirsSync(COMPILER_TEMP);
 	// console.log(config);
+	return compileCmds;
+}
+
+var prepareSysCmds = function(){
+	var cmds = {};
+	var url = path.join(COMPILER_ROOT , CMD_ROOT);
+	var list = fs.readdirSync(url);
+	for(var i = 0, dir; dir = list[i]; i++) {
+		if(fs.statSync(path.join(url, dir) ).isDirectory()){
+			cmds[dir] = {
+				'id': dir,
+				'root': path.join(COMPILER_ROOT , 'cmds' , dir)
+			}
+		}
+	}
 	return cmds;
+}
+
+/**
+ * 把简写的命令都展开
+ * @param  {[type]} cmds [description]
+ * @return {[type]}      [description]
+ */
+var expandCmds = function(cmds){
+	for(var i in cmds){
+		if(ztool.isObject(cmds[i])){
+			continue;
+		}
+		// console.log(i);
+		cmds[i] = explainCmd(cmds[i]);
+		// console.log('============');
+	}
+	return cmds;
+}
+
+var explainCmd = function(cmd){
+	var result = [];
+	var arr = cmd.replace(/\s+/g, '').split('|');
+	// console.log(arr);
+	for (var i = 0; i < arr.length; i++) {
+		cmd = arr[i];
+		if(!cmd){
+			continue;
+		}
+		if(!compileCmds[cmd]){
+			throw 'the cmd "' + cmd + '" is not exists. ';
+		}
+		cmd = compileCmds[cmd];
+		// console.log(arr[i],cmd);
+		if(ztool.isString(cmd)){
+			// console.log('>>>>>>>>>>explainCmd ', cmd);
+			// findCmdObject(cmd, result);
+			result = result.concat(explainCmd(cmd));
+		}else if(ztool.isArray(cmd)){
+			result = result.concat(cmd);
+		}else{
+			result.push(cmd);
+		}
+	};
+	return result;
 }
 
 var makePathArray = function(arr, root){
@@ -89,63 +147,22 @@ var makePathArray = function(arr, root){
 	return arr;
 }
 
-var expandCmd = function(cmd){
-	if(!ztool.isString(compileCmds[cmd])){
-		return cmd;
-	}
-	cmd = compileCmds[cmd];
-	var cmdArr = cmd.split('|');
-	if(cmdArr.length > 1){
-		for(var i = 0; i < cmdArr.length; i++){
-			cmdArr[i] = expandCmd(cmdArr[i]);
-		}
-	}
-	return cmd;
-}
-
-var analyseCmd = function(cmd){
-	var result = [];
-	//先把嵌套的命令都展开
-	cmd = expandCmd(cmd);
-	var cmdArr = cmd.replace(/\s+/g, '').split('|');
-	var pcmdArr, pcmd, tcmd;
-	for(var i = 0; i < cmdArr.length; i++){
-		pcmdArr = cmdArr[i].split(',');
-		for (var j = 0; j < pcmdArr.length; j++) {
-			pcmd = pcmdArr[j];
-			tcmd = compileCmds[pcmd];
-			if(!tcmd){
-				throw 'the cmd "' + pcmd + '" is not exists. ';
-			}
-			//TODO
-			if(ztool.isString(tcmd)){
-				result = result.concat(analyseCmd(tcmd));
-			}
-		};
-		result.push(pcmd);
-
-		
-	}
-	return result;
-}
-
 /**
  * 分析每条规则并创建任务
  */
 var createTasks = function(){
 	var config = compileConfig;
-	var cmds = compileCmds;
 	var tasks = [];
 	var task, rule, cmd;
 	for(var r in config.rules){
 		rule = config.rules[r];
 		var source = makePathArray(rule.source, config.sourceRoot),
 			target = path.join(config.targetRoot, rule.target);// makePathArray(rule.target, config.targetRoot);
-		//处理用管道串起来的多个命令
 		cmd = rule.cmd || config.defaultCmd;
-		var rCmds = analyseCmd(cmd);
-		// console.log(rCmds);
-		var len = rCmds.length;
+		//处理用管道串起来的多个命令
+		var execCmds = explainCmd(cmd);
+		// console.log(execCmds);
+		var len = execCmds.length;
 		var params = rule.params || {};
 		if(!len){
 			throw 'this rule " ' + r + '" don\'t have cmd . ';
@@ -161,9 +178,9 @@ var createTasks = function(){
 			params = arr;
 		}
 		var src = source, tar = target;
-		for(var i = 0; cmd = rCmds[i]; i++) {
+		for(var i = 0; cmd = execCmds[i]; i++) {
 		    task = {
-		    	id: r + '.' + cmd,
+		    	id: r + '.' + cmd.id,
 		    	cmd: cmd,
 		    	params: params[i] || {}
 		    }
@@ -181,6 +198,7 @@ var createTasks = function(){
 		}
 
 	}
+	compileTaskList = tasks;
 	// console.dir(tasks);
 	return tasks;
 }
@@ -188,20 +206,18 @@ var createTasks = function(){
  * 执行所有任务
  */
 var execTasks = function(){
-	var config = compileConfig, 
-		cmds = compileCmds, 
-		tasks = compileTaskList;
-	// console.log(JSON.stringify(tasks));
+	// console.log(JSON.stringify(compileTaskList));
 	// return;
-	for(var i = 0, task, cmd; task = tasks[i]; i++) {
-    	cmd = cmds[task.cmd];
+	for(var i = 0, task, cmd; task = compileTaskList[i]; i++) {
+    	// cmd = cmds[task.cmd];
+    	cmd = task.cmd;
     	console.log('>>exec ' + task.id + '...');
     	var runOptions = {
     		compilerRoot: COMPILER_ROOT,
     		dirname: cmd.root,
     		filename: path.join(cmd.root, 'index.js')
     	};
-    	require(cmd.root).execute(task, config, runOptions);
+    	require(cmd.root).execute(task, compileConfig, runOptions);
 	}
 }
 /**
@@ -214,9 +230,9 @@ var clean = function(){
 //************ 下面是主流程 ************************************
 var compile = function(fileName){
 	var start = new Date();
-	compileConfig = readConfig(fileName);
-	compileCmds = init();
-	compileTaskList = createTasks();
+	readConfig(fileName);
+	init();
+	createTasks();
 	execTasks();
 	clean();
 	console.log('time consume:' + (new Date() - start) + 'ms.');
