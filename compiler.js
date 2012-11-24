@@ -111,7 +111,7 @@ var expandCmds = function(cmds){
 }
 
 var explainCmd = function(cmd){
-	var result = [];
+	var result = [], execCmd;
 	var arr = cmd.replace(/\s+/g, '').split('|');
 	// console.log(arr);
 	for (var i = 0; i < arr.length; i++) {
@@ -119,19 +119,27 @@ var explainCmd = function(cmd){
 		if(!cmd){
 			continue;
 		}
-		if(!compileCmds[cmd]){
-			throw 'the cmd "' + cmd + '" is not exists. ';
-		}
-		cmd = compileCmds[cmd];
-		// console.log(arr[i],cmd);
-		if(ztool.isString(cmd)){
-			// console.log('>>>>>>>>>>explainCmd ', cmd);
-			// findCmdObject(cmd, result);
-			result = result.concat(explainCmd(cmd));
-		}else if(ztool.isArray(cmd)){
-			result = result.concat(cmd);
+		execCmd = compileCmds[cmd];
+		if(!execCmd){
+			if(cmd.indexOf(',') > -1){
+				//处理并列命令
+				var parallCmdArr = cmd.split(',');
+				var parallArr = [];
+				for (var j = 0; j < parallCmdArr.length; j++) {
+					parallArr = parallArr.concat(explainCmd(parallCmdArr[j]));
+				};
+				result.push(parallArr);
+			}else{
+				throw 'the cmd "' + cmd + '" is not exists. ';
+			}
+		}else if(ztool.isString(execCmd)){
+			// console.log('>>>>>>>>>>explainCmd ', execCmd);
+			// findCmdObject(execCmd, result);
+			result = result.concat(explainCmd(execCmd));
+		}else if(ztool.isArray(execCmd)){
+			result = result.concat(execCmd);
 		}else{
-			result.push(cmd);
+			result.push(execCmd);
 		}
 	};
 	return result;
@@ -147,6 +155,14 @@ var makePathArray = function(arr, root){
 	return arr;
 }
 
+var getCombineId = function(arr){
+	var result = [];
+	for (var i = 0; i < arr.length; i++) {
+		result.push(arr[i].id);
+	};
+	return result.join('_');
+}
+
 /**
  * 分析每条规则并创建任务
  */
@@ -156,8 +172,8 @@ var createTasks = function(){
 	var task, rule, cmd;
 	for(var r in config.rules){
 		rule = config.rules[r];
-		var source = makePathArray(rule.source, config.sourceRoot),
-			target = path.join(config.targetRoot, rule.target);// makePathArray(rule.target, config.targetRoot);
+		var originSource = makePathArray(rule.source, config.sourceRoot),
+			originTarget = path.join(config.targetRoot, rule.target);// makePathArray(rule.target, config.targetRoot);
 		cmd = rule.cmd || config.defaultCmd;
 		//处理用管道串起来的多个命令
 		var execCmds = explainCmd(cmd);
@@ -177,24 +193,50 @@ var createTasks = function(){
 			}
 			params = arr;
 		}
-		var src = source, tar = target;
+		var source = originSource, target = originTarget;
 		for(var i = 0; cmd = execCmds[i]; i++) {
-		    task = {
-		    	id: r + '.' + cmd.id,
-		    	cmd: cmd,
-		    	params: params[i] || {}
-		    }
-		    tasks.push(task);
-		    if(i === len - 1){
-		    	//最后一个命令, 指定其输出 target
-				tar = target;
+			if(ztool.isArray(cmd)){//命令是数组的时候，说明是并行的命令，输入和输出都是同一个
+				var taskParentId = getCombineId(cmd);
+				if(i === len - 1){
+			    	//最后一个命令, 指定其输出 target
+					target = originTarget;
+				}else{
+					target = path.join(COMPILER_TEMP, taskParentId, path.sep);
+				}
+				for (var j = 0; j < cmd.length; j++) {
+					task = {
+				    	id: r + '.' + taskParentId + '.' + cmd[j].id,
+				    	cmd: cmd[j],
+				    	source: source,
+				    	target: target
+				    }
+				    if(ztool.isArray(params[i])){
+				    	task.params = params[i][j] || {};
+				    }else{
+				    	task.params = params[i] || {};
+				    }
+				    tasks.push(task);
+				};
+				//上一个命令的输出是下一个命令的输入
+				source = [target];
 			}else{
-				tar = path.join(COMPILER_TEMP, task.id, path.sep);
+				task = {
+			    	id: r + '.' + cmd.id,
+			    	cmd: cmd,
+			    	params: params[i] || {}
+			    }
+			    tasks.push(task);
+			    if(i === len - 1){
+			    	//最后一个命令, 指定其输出 target
+					target = originTarget;
+				}else{
+					target = path.join(COMPILER_TEMP, task.id, path.sep);
+				}
+				task.source = source;
+				task.target = target;
+				//上一个命令的输出是下一个命令的输入
+				source = [target];
 			}
-			task.source = src;
-			task.target = tar;
-			//上一个命令的输出是下一个命令的输入
-			src = [tar];
 		}
 
 	}
@@ -224,7 +266,7 @@ var execTasks = function(){
  * 执行完所有任务后的清理工作
  */
 var clean = function(){
-	// nf.rmdirsSync(COMPILER_TEMP);
+	nf.rmdirsSync(COMPILER_TEMP);
 }
 
 //************ 下面是主流程 ************************************
