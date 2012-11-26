@@ -35,7 +35,7 @@ var compress = function(src, target){
 exports.execute = function(task, config, runOptions){
 	var src, files, target;
 	options = runOptions;
-	ztool = require(path.join(options.compilerRoot, 'ztool.js'));
+	ztool = runOptions.ztool;
 	var params = task.params || {};
 	for (var i = 0; i < task.source.length; i++) {
 		src = task.source[i].trim();

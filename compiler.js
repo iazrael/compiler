@@ -68,6 +68,7 @@ var init = function(){
 	config.cmds = compileCmds;
 	config.sourceRoot = path.resolve(config.sourceRoot);
 	config.targetRoot = path.resolve(config.targetRoot);
+	// console.log(config.sourceRoot);
 	// console.log(config.targetRoot);
 	nf.rmdirsSync(config.targetRoot);
 	nf.mkdirsSync(config.targetRoot);
@@ -259,6 +260,7 @@ var execTasks = function(){
     	}
     	var runOptions = {
     		compilerRoot: COMPILER_ROOT,
+    		ztool: ztool,
     		dirname: cmd.root,
     		filename: path.join(cmd.root, 'index.js')
     	};

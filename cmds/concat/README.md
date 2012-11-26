@@ -9,5 +9,8 @@ config.json 的配置示例
 			"js/ace/mode-javascript.js",
 			"js/ace/theme-tumblr.js"
 		],
-		"target": "js/all.js"
+		"target": "js/all.js",
+		"params": {
+			"fileFormat": "js,css",//要合并的文件类型
+		}
 	}

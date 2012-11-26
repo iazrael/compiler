@@ -4,7 +4,7 @@ var fs = require('fs'),
 var nf = require('node-file');
 
 exports.execute = function(task, config, runOptions){
-	var ztool = require(path.join(runOptions.compilerRoot, 'ztool.js'));
+	var ztool = runOptions.ztool;
 	var src, files, content = '', suffix;
 	for (var i = 0; i < task.source.length; i++) {
 		src = task.source[i].trim();
