@@ -15,8 +15,8 @@ exports.execute = function(task, config){
 			nf.copyFileSync(src, task.target, true);
 		}else{
 			var type = task.params.fileFormat || config.fileFormat || false;
-			
-			files = nf.listFilesSync(src, type, true);
+			var recursive = task.params.recursive || false;
+			files = nf.listFilesSync(src, type, recursive);
 			// console.log(src);
 			// console.log(files);
 			for (var j = 0, target, source; j < files.length; j++) {
