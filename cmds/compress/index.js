@@ -49,7 +49,9 @@ exports.execute = function(task, config, runOptions){
 				type = params.fileFormat;
 			} 
 			// console.log(type);
-			files = nf.listFilesSync(src, type, true);
+			var recursive = task.params.recursive;
+			recursive = typeof recursive === 'undefined' ? true : recursive;
+			files = nf.listFilesSync(src, type, recursive);
 			// console.log(src);
 			// console.log(files);
 			for (var j = 0, source; j < files.length; j++) {
