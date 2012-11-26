@@ -7,7 +7,6 @@ var nf = require('node-file');
 exports.execute = function(task, config, runOptions){
 	var src, files, target, source;
 	var sourceRoot = path.normalize(config.sourceRoot);
-	var ztool = runOptions.ztool;
 	for (var i = 0; i < task.source.length; i++) {
 		src = task.source[i].trim();
 		if(!src){
@@ -15,7 +14,7 @@ exports.execute = function(task, config, runOptions){
 		}
 		if(fs.statSync(src).isFile()){
 			target = task.target;
-			if(ztool.endsWith(target, path.sep)){
+			if(nf.isDirectoryPath(target)){
 				target = path.join(target, src.replace(sourceRoot, ''));
 			}
 			nf.copyFileSync(src, target, true);

@@ -5,7 +5,6 @@ var fs = require('fs'),
 	;
 var nf = require('node-file');
 
-var options, ztool;
 
 var compressJs = function(src, target){
 	var result = uglifyJS.minify(src);
@@ -34,8 +33,7 @@ var compress = function(src, target){
 
 exports.execute = function(task, config, runOptions){
 	var src, files, target;
-	options = runOptions;
-	ztool = runOptions.ztool;
+	var sourceRoot = path.normalize(config.sourceRoot);
 	var params = task.params || {};
 	for (var i = 0; i < task.source.length; i++) {
 		src = task.source[i].trim();
@@ -56,17 +54,19 @@ exports.execute = function(task, config, runOptions){
 			// console.log(files);
 			for (var j = 0, source; j < files.length; j++) {
 				source = path.join(src, files[j]);
-				target = path.join(task.target, files[j]);
-				if(ztool.endsWith(target, path.sep)){
-					target = path.join(target, path.basename(src));
-				}
+				// target = path.join(task.target, files[j]);
+				// if(nf.isDirectoryPath(target)){
+				target = path.join(task.target, src.replace(sourceRoot, ''), files[j]);
+				// }
+				// console.log(target);
 				compress(source, target);
 				
 			}
 		}else{
 			target = task.target;
-			if(ztool.endsWith(target, path.sep)){
-				target = path.join(target, path.basename(src));
+			// console.log(target);
+			if(nf.isDirectoryPath(target)){
+				target = path.join(target, src.replace(sourceRoot, ''));
 			}
 			compress(src, target);
 		}
