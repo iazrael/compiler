@@ -254,12 +254,18 @@ var execTasks = function(){
     	// cmd = cmds[task.cmd];
     	cmd = task.cmd;
     	console.log('>>exec ' + task.id + '...');
+    	if(compileConfig.debug){
+    		console.log(task);
+    	}
     	var runOptions = {
     		compilerRoot: COMPILER_ROOT,
     		dirname: cmd.root,
     		filename: path.join(cmd.root, 'index.js')
     	};
-    	require(cmd.root).execute(task, compileConfig, runOptions);
+    	var result = require(cmd.root).execute(task, compileConfig, runOptions);
+    	// if(result && compileTaskList[i+1]){
+    	// 	compileTaskList[i+1].source = [result];
+    	// }
 	}
 }
 /**
@@ -276,7 +282,9 @@ var compile = function(fileName){
 	init();
 	createTasks();
 	execTasks();
-	clean();
+	if(!compileConfig.debug){
+		clean();
+	}
 	console.log('time consume:' + (new Date() - start) + 'ms.');
 }
 
