@@ -59,7 +59,8 @@ var init = function(){
 	config = ztool.merge({}, DEFAULT_CONFIG, config);
 
 	if(config.cmds){//合并命令
-		compileCmds = ztool.merge({}, compileCmds, config.cmds);
+		var customCmds = prepareCustomCmds(config.cmds);
+		compileCmds = ztool.merge({}, compileCmds, customCmds);
 		// 先展开简写的命令
 		compileCmds = expandCmds(compileCmds);
 		// console.log(JSON.stringify(compileCmds));
@@ -89,6 +90,15 @@ var prepareSysCmds = function(){
 				'id': dir,
 				'root': path.join(COMPILER_ROOT , 'cmds' , dir)
 			}
+		}
+	}
+	return cmds;
+}
+
+var prepareCustomCmds = function(cmds){
+	for(var i in cmds){
+		if(ztool.isObject(cmds[i])){
+			cmds[i].root = path.resolve(cmds[i].root);
 		}
 	}
 	return cmds;
