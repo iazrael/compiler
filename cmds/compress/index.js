@@ -72,7 +72,9 @@ exports.execute = function(task, config, runOptions){
 			target = task.target;
 			// console.log(target);
 			if(nf.isDirectoryPath(target)){
-				target = path.join(target, src.replace(sourceRoot, ''));
+				if(keepHierarchy){
+					target = path.join(target, src.replace(sourceRoot, ''));
+				}
 			}
 			compress(src, target);
 		}
