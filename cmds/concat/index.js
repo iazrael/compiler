@@ -19,18 +19,18 @@ exports.execute = function(task, config, runOptions){
 			// console.log(files);
 			for (var j = 0, source; j < files.length; j++) {
 				source = path.join(src, files[j]);
-				// suffix = path.extname(files[j]);
+				suffix = path.extname(files[j]);
 				content += fs.readFileSync(source).toString();
 			};
 		}else{
-			// suffix = path.extname(src);
+			suffix = path.extname(src);
 			content += fs.readFileSync(src).toString();
 		}
 	}
 	var target = task.target;
 	if(ztool.endsWith(target, path.sep)){
-		// target = path.join(target, task.id + (suffix || '.tmp'));
-		target = path.join(target, task.id + '.tmp');
+		target = path.join(target, task.id + (suffix || '.tmp'));
+		// target = path.join(target, task.id + '.tmp');
 	}
 	nf.writeFileSync(target, content);
 	// return target;

@@ -35,6 +35,7 @@ exports.execute = function(task, config, runOptions){
 	var src, files, target;
 	var sourceRoot = path.normalize(config.sourceRoot);
 	var params = task.params || {};
+	var keepHierarchy = typeof params.keepHierarchy === 'undefined' ? true : keepHierarchy;
 	for (var i = 0; i < task.source.length; i++) {
 		src = task.source[i].trim();
 		if(!src){
@@ -55,10 +56,15 @@ exports.execute = function(task, config, runOptions){
 			for (var j = 0, source; j < files.length; j++) {
 				source = path.join(src, files[j]);
 				// target = path.join(task.target, files[j]);
-				// if(nf.isDirectoryPath(target)){
-				target = path.join(task.target, src.replace(sourceRoot, ''), files[j]);
-				// }
-				// console.log(target);
+				target = task.target;
+				if(nf.isDirectoryPath(target)){
+					if(keepHierarchy){
+						target = path.join(task.target, src.replace(sourceRoot, ''), files[j]);
+					}else{
+						target = path.join(task.target, files[j]);
+					}
+				}
+				console.log(files[j], target);
 				compress(source, target);
 				
 			}
