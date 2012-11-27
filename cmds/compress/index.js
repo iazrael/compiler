@@ -64,7 +64,7 @@ exports.execute = function(task, config, runOptions){
 						target = path.join(task.target, files[j]);
 					}
 				}
-				console.log(files[j], target);
+				// console.log(files[j], target);
 				compress(source, target);
 				
 			}
