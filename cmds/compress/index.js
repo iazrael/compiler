@@ -35,7 +35,7 @@ exports.execute = function(task, config, runOptions){
 	var src, files, target;
 	var sourceRoot = path.normalize(config.sourceRoot);
 	var params = task.params || {};
-	var keepHierarchy = typeof params.keepHierarchy === 'undefined' ? true : keepHierarchy;
+	var keepHierarchy = typeof params.keepHierarchy === 'undefined' ? true : params.keepHierarchy;
 	for (var i = 0; i < task.source.length; i++) {
 		src = task.source[i].trim();
 		if(!src){
