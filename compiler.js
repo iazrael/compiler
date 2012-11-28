@@ -75,10 +75,12 @@ var init = function(){
 	config.targetRoot = path.resolve(config.targetRoot);
 	// console.log(config.sourceRoot);
 	// console.log(config.targetRoot);
-	nf.rmdirsSync(config.targetRoot);
+	try{
+		nf.rmdirsSync(config.targetRoot);
+		nf.rmdirsSync(COMPILER_TEMP);
+	}catch(e){}
 	nf.mkdirsSync(config.targetRoot);
 	//创建个临时目录
-	nf.rmdirsSync(COMPILER_TEMP);
 	nf.mkdirsSync(COMPILER_TEMP);
 	// console.log(config);
 	return compileCmds;

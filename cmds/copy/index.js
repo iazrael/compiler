@@ -4,10 +4,11 @@ var fs = require('fs'),
 var nf = require('node-file');
 
 
-var readyToCopyFiles = [];
+var readyToCopyFiles;
 var nextExecuteTask;
 
 var executeCopyTask = function(){
+	// console.log(readyToCopyFiles);
 	var fileCount = readyToCopyFiles.length;
 	var onCopyFinish = function(){
 		fileCount--;
@@ -25,6 +26,7 @@ exports.async = true;
 
 exports.execute = function(task, config, runOptions, nextTask){
 	nextExecuteTask = nextTask;
+	readyToCopyFiles = [];
 	var src, files, target, source;
 	var sourceRoot = path.normalize(config.sourceRoot);
 	var params = task.params;
@@ -37,6 +39,7 @@ exports.execute = function(task, config, runOptions, nextTask){
 		if(!src){
 			continue;
 		}
+		// console.log(src);
 		if(fs.statSync(src).isFile()){
 			target = task.target;
 			if(nf.isDirectoryPath(target)){
