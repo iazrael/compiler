@@ -19,7 +19,11 @@ var path = require('path'),
 
 var ztool = require(COMPILER_ROOT + '/ztool.js');
 
-var compileConfig, compileCmds, compileTaskList, currentTaskIndex;
+var compileStart, 
+	compileConfig, 
+	compileCmds, 
+	compileTaskList, 
+	currentTaskIndex;
 
 /**
  * 读取用户配置并进行预处理
@@ -259,6 +263,7 @@ var createTasks = function(){
 var nextTask = function(){
 	var task = compileTaskList[currentTaskIndex++];
 	if(!task){
+		finish();
 		return;
 	}
 	var cmd = task.cmd;
@@ -274,6 +279,7 @@ var nextTask = function(){
 	};
 	var module = require(cmd.root);
 	module.execute(task, compileConfig, runOptions, nextTask);
+	// console.log(module.async);
 	if(!module.async){
 		nextTask();
 	}
@@ -288,6 +294,14 @@ var execTasks = function(){
 	currentTaskIndex = 0;
 	nextTask();
 }
+
+var finish = function(){
+	if(!compileConfig.debug){
+		clean();
+	}
+	console.log('time consume:' + (new Date() - compileStart) + 'ms.');
+}
+
 /**
  * 执行完所有任务后的清理工作
  */
@@ -297,15 +311,11 @@ var clean = function(){
 
 //************ 下面是主流程 ************************************
 var compile = function(fileName){
-	var start = new Date();
+	compileStart = new Date();
 	readConfig(fileName);
 	init();
 	createTasks();
 	execTasks();
-	if(!compileConfig.debug){
-		clean();
-	}
-	console.log('time consume:' + (new Date() - start) + 'ms.');
 }
 
 if(process.argv.length < 2){

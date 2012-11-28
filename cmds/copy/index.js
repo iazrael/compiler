@@ -49,7 +49,6 @@ exports.execute = function(task, config, runOptions, nextTask){
 			files = nf.listFilesSync(src, type, recursive);
 			// console.log(src);
 			// console.log(files);
-			fileCount += files.length;
 			for (var j = 0; j < files.length; j++) {
 				source = path.join(src, files[j]);
 				if(keepHierarchy){
