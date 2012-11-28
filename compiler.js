@@ -19,7 +19,7 @@ var path = require('path'),
 
 var ztool = require(COMPILER_ROOT + '/ztool.js');
 
-var compileConfig, compileCmds, compileTaskList;
+var compileConfig, compileCmds, compileTaskList, currentTaskIndex;
 
 /**
  * 读取用户配置并进行预处理
@@ -255,30 +255,38 @@ var createTasks = function(){
 	// console.dir(tasks);
 	return tasks;
 }
+
+var nextTask = function(){
+	var task = compileTaskList[currentTaskIndex++];
+	if(!task){
+		return;
+	}
+	var cmd = task.cmd;
+	console.log('>>exec ' + task.id + '...');
+	if(compileConfig.debug){
+		console.log(task);
+	}
+	var runOptions = {
+		compilerRoot: COMPILER_ROOT,
+		ztool: ztool,
+		dirname: cmd.root,
+		filename: path.join(cmd.root, 'index.js')
+	};
+	var module = require(cmd.root);
+	module.execute(task, compileConfig, runOptions, nextTask);
+	if(!module.async){
+		nextTask();
+	}
+}
+
 /**
  * 执行所有任务
  */
 var execTasks = function(){
 	// console.log(JSON.stringify(compileTaskList));
 	// return;
-	for(var i = 0, task, cmd; task = compileTaskList[i]; i++) {
-    	// cmd = cmds[task.cmd];
-    	cmd = task.cmd;
-    	console.log('>>exec ' + task.id + '...');
-    	if(compileConfig.debug){
-    		console.log(task);
-    	}
-    	var runOptions = {
-    		compilerRoot: COMPILER_ROOT,
-    		ztool: ztool,
-    		dirname: cmd.root,
-    		filename: path.join(cmd.root, 'index.js')
-    	};
-    	var result = require(cmd.root).execute(task, compileConfig, runOptions);
-    	// if(result && compileTaskList[i+1]){
-    	// 	compileTaskList[i+1].source = [result];
-    	// }
-	}
+	currentTaskIndex = 0;
+	nextTask();
 }
 /**
  * 执行完所有任务后的清理工作
