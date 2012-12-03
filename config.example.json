@@ -1,59 +1,125 @@
 {
 	"sourceRoot": "./",
 	"targetRoot": "./build",
-	"fileFormat": "js,css,html,htm,png,gif,jpg,jpeg",
-	"debug": true,
+	"fileFormat": "js,css,html,htm,png,gif,jpg,jpeg,wav,json",
+	// "debug": true,
 	"cmds": {
-		"concat_compress_copy": "concat|compress|copy",
-		"concat_copy": "concat|copy",
-		"pickup_template": {
-			"root": "./templatepicker"
-		}
+		// "test": "concat_compress_copy|concat_copy",
+		// "test1": "test2|test3|concat_copy",
+		// "test2": "concat|compress,copy",
+		// "test3": "concat_compress|test2",
+		// "concat_compress_copy": "concat_compress|copy",
+		// "concat_compress": "concat|compress",
+		// "concat_copy": "concat|copy",
+		// "pickup_template": {
+		// 	"id": "template-picker",
+		// 	"root": "./template-picker"
+		// }
 	},
 	"rules": {
-		"translate_index": {
-			"cmd": "concat|copy",
-			"source": "",
-			"target": "",
-			"params": []
+		"copy": {
+			"cmd": "copy",
+			"target": "./",
+			"source": [
+				"audio/",
+				"style/",
+				"robot/",
+				"doc/",
+				"data/",
+				"favicon.ico"
+			]
+		},
+		"compress": {
+			"cmd": "compress",
+			"target": "./",
+			"source": [
+				"js/game/coderobot.worker.js",
+				"js/site/site.ranking.js",
+                "js/site/site.message.js"
+			]
+		},
+		"pickup_template": {
+			"cmd": "template-picker",
+			"source": [
+				"index2.html",
+				"main.html"
+			],
+			"target": "./",
+			"params": {
+				//容纳模板代码的js文件
+				"templateOutput": "js/output.js",
+				//模板代码在 templateOutput 中的占位符
+				"templatePlaceholder": "/*%HtmlTemplateFunctions%*/",
+				//指定是否把模板代码里的连续空格或TAB压缩成一个空格
+				//可能有些地方的空格会意外的被压缩掉，默认 false
+				"compressWhitespace": false
+			}
+		},
+		"manifest": {
+			"cmd": "ioffline",
+			"source": [
+				"index3.html"
+			],
+			"target": "./",
+			"params": {
+			    "linkPrefix": "http://cdn.xxx.com/",
+			    "manifestName": "offline.manifest",
+			    "network": [  "*"  ],
+			    "fallback": [
+			        "/ fallback.html"
+			    ]
+			}
 		},
 		"concat_js": {
 			"cmd": "concat",
 			"source": [
-				"js/ace/ace.js",
-				"js/ace/mode-javascript.js",
-				"js/ace/theme-tumblr.js"
+				"js/jx/jx.console.js",
+				"js/jx/jx.cookie.js",
+				"js/site/"
 			],
-			"target": "js/ace.concat.js"
+			"target": "js/all.concat.js"
 		},
 		"compress_js": {
 			"cmd": "compress",
 			"source": [
-				"js/ace.concat.js"
+				"style/"
+				// "js/ranking.js"
 			],
-			"target": "./"
+			"target": "./style/",//compress 插件要求，target如果是目录，必须加上 “/”
+			"params":{
+				"fileFormat": "css"
+			}
 		},
 		"copy_js": {
 			"cmd": "copy",
 			"source": [
-				"js/ace.concat.js"
+				"js/"
 			],
 			"target": "./"
 		},
-		"concat_compress_copy": {
-			"cmd": "concat_compress_copy",
+		
+		"compress_concat": {
+			"cmd": "compress|concat",
 			"source": [
-				"js/ace/ace.js",
-				"js/ace/mode-javascript.js",
-				"js/ace/theme-tumblr.js"
+				"js/jx/jx.string.js",
+				"js/qtool.js",
+				"js/ranking.js"
 			],
-			"target": "js/ace.concat.js"
+			"target": "js/all.js"
 		},
-		"spriter": {
-			"cmd": "ispriter",
-			"source": "css/",
-			"target": "css/",
-			"depends": "copy_js,concat_compress_copy"
+		"ispriter": {
+			"cmd": "ispriter|compress,copy",
+			// "cmd": "ispriter",
+			"source": "style/",
+			"target": "spriteout/",
+			"params": [
+				null,
+				[{
+					"fileFormat": "css"
+				},{
+					"fileFormat": "png"
+				}]
+			]
 		}
 	}
 }
