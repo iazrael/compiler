@@ -316,8 +316,8 @@ var compile = function(fileName){
 	compileStart = new Date();
 	readConfig(fileName);
 	init();//console.log(compileCmds);
-	createTasks();console.log(compileTaskList);
-	return;
+	createTasks();//console.log(compileTaskList);
+	//return;
 	execTasks();
 }
 
