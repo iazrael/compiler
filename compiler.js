@@ -315,8 +315,9 @@ var clean = function(){
 var compile = function(fileName){
 	compileStart = new Date();
 	readConfig(fileName);
-	init();
-	createTasks();
+	init();//console.log(compileCmds);
+	createTasks();console.log(compileTaskList);
+	return;
 	execTasks();
 }
 

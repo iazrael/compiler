@@ -4,112 +4,93 @@
 	"fileFormat": "js,css,html,htm,png,gif,jpg,jpeg,wav,json",
 	// "debug": true,
 	"cmds": {
-		// "test": "concat_compress_copy|concat_copy",
-		// "test1": "test2|test3|concat_copy",
-		// "test2": "concat|compress,copy",
-		// "test3": "concat_compress|test2",
-		// "concat_compress_copy": "concat_compress|copy",
-		// "concat_compress": "concat|compress",
-		// "concat_copy": "concat|copy",
-		// "pickup_template": {
-		// 	"id": "template-picker",
-		// 	"root": "./template-picker"
-		// }
+		"concat_compress": "concat|compress",
+		"translate": {
+			"id": "translate",
+			"root": "./custom_cmds/translate/"
+		}
 	},
 	"rules": {
-		"copy": {
+		"copy_html": {
+			"cmd": "copy",
+			"target": "./",
+			"source": "./",
+			"params": {
+				"fileFormat": "html",
+				"recursive": false
+			}
+		},
+		"translate_html": {
+			"cmd": "translate|copy,compress",
+			"target": "./",
+			"source": "./",
+			"params": [
+				{
+					"htmls": [
+						"index.html",
+						"rank.html"
+					]
+				},
+				[{
+					"fileFormat": "html",
+					"keepHierarchy": false
+				},
+				{
+					"keepHierarchy": false
+				}]
+			]
+		},
+		"copy_other": {
 			"cmd": "copy",
 			"target": "./",
 			"source": [
 				"audio/",
-				"style/",
-				"robot/",
-				"doc/",
-				"data/",
-				"favicon.ico"
+                "style/",
+                "robot/",
+                "doc/",
+                "data/",
+                "favicon.ico"
 			]
 		},
-		"compress": {
+		"copy_ace_worker": {
+			"cmd": "copy",
+			"target": "./",
+			"source": [
+                "js/ace/worker-javascript.js"
+			],
+			"params": {
+				"keepHierarchy": false
+			}
+		},
+		"compress_coppy": {
 			"cmd": "compress",
 			"target": "./",
 			"source": [
 				"js/game/coderobot.worker.js",
 				"js/site/site.ranking.js",
-                "js/site/site.message.js"
+				"js/site/site.message.js"
 			]
 		},
-		"pickup_template": {
-			"cmd": "template-picker",
+		"ace_all": {
+			"cmd": "concat_compress",
+			"target": "js/ace.all.js",
 			"source": [
-				"index2.html",
-				"main.html"
-			],
-			"target": "./",
-			"params": {
-				//容纳模板代码的js文件
-				"templateOutput": "js/output.js",
-				//模板代码在 templateOutput 中的占位符
-				"templatePlaceholder": "/*%HtmlTemplateFunctions%*/",
-				//指定是否把模板代码里的连续空格或TAB压缩成一个空格
-				//可能有些地方的空格会意外的被压缩掉，默认 false
-				"compressWhitespace": false
-			}
+				"js/ace/ace.js",
+                "js/ace/mode-javascript.js",
+                "js/ace/theme-tumblr.js"
+			]
 		},
-		"manifest": {
-			"cmd": "ioffline",
+		"share_all": {
+			"cmd": "concat_compress",
+			"target": "js/share.all.js",
 			"source": [
-				"index3.html"
-			],
-			"target": "./",
-			"params": {
-			    "linkPrefix": "http://cdn.xxx.com/",
-			    "manifestName": "offline.manifest",
-			    "network": [  "*"  ],
-			    "fallback": [
-			        "/ fallback.html"
-			    ]
-			}
-		},
-		"concat_js": {
-			"cmd": "concat",
-			"source": [
-				"js/jx/jx.console.js",
-				"js/jx/jx.cookie.js",
-				"js/site/"
-			],
-			"target": "js/all.concat.js"
-		},
-		"compress_js": {
-			"cmd": "compress",
-			"source": [
-				"style/"
-				// "js/ranking.js"
-			],
-			"target": "./style/",//compress 插件要求，target如果是目录，必须加上 “/”
-			"params":{
-				"fileFormat": "css"
-			}
-		},
-		"copy_js": {
-			"cmd": "copy",
-			"source": [
-				"js/"
-			],
-			"target": "./"
-		},
-		
-		"compress_concat": {
-			"cmd": "compress|concat",
-			"source": [
-				"js/jx/jx.string.js",
-				"js/qtool.js",
-				"js/ranking.js"
-			],
-			"target": "js/all.js"
+				"js/site/site.sharebox.js",
+                "js/site/site.shareapi.js",
+                "js/site/site.share.js"
+			]
 		},
 		"ispriter": {
 			"cmd": "ispriter|compress,copy",
-			// "cmd": "ispriter",
 			"source": "style/",
 			"target": "spriteout/",
 			"params": [
