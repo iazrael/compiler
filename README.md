@@ -16,3 +16,5 @@ Web 项目编译脚本，可以方便的进行文件合并、代码压缩、自�
 
 	3. 简单的移植适配能力
 
+
+更详细的介绍，请移步这里 [Compiler@NodeJS](http://imatlas.com/posts/nodejs-compiler/)
