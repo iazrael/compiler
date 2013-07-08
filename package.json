@@ -13,7 +13,12 @@
     "node": "*"
   },
   "dependencies": {
-    "node-file": "*"
+    "node-file": "*",
+    "clean-css": "*",
+    "uglify-js2": "*",
+    "ioffline": "*",
+    "ioffline": "*",
+    "template-picker": "*"
   },
   "devDependencies": {},
   "optionalDependencies": {}
