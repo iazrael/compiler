@@ -1,4 +1,5 @@
 config.json中的配置示例, 详细说明见 [ispriter](https://github.com/iazrael/ispriter)
+注意：ispriter 需自己手动安装
 
 注意：需手动安装ispriter (安装完所有依赖之后，npm install ispriter)
 
