@@ -1,5 +1,7 @@
 config.json中的配置示例，详细说明见[template-picker](https://github.com/iazrael/template-picker)
 
+注意：需手动安装template-picker (npm install template-picker)
+
 	"pickup_template": {
 		"cmd": "template-picker",
 		"source": [//需要抽取模板代码的页面
