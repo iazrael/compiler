@@ -60,7 +60,7 @@ var init = function(){
 	var config = compileConfig;
 	compileCmds = prepareSysCmds();
 	// console.log(cmds);
-	config = ztool.merge({}, DEFAULT_CONFIG, config);
+	config = compileConfig = ztool.merge({}, DEFAULT_CONFIG, config);
 
 	if(config.cmds){//合并命令
 		var customCmds = prepareCustomCmds(config.cmds);
@@ -279,7 +279,9 @@ var nextTask = function(){
 		dirname: cmd.root,
 		filename: path.join(cmd.root, 'index.js')
 	};
+	// console.log(cmd.root);
 	var module = require(cmd.root);
+	// console.log(module);
 	module.execute(task, compileConfig, runOptions, nextTask);
 	// console.log(module.async);
 	if(!module.async){
