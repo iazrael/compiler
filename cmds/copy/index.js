@@ -41,6 +41,9 @@ exports.execute = function(task, config, runOptions, nextTask){
 		}
 		// console.log(src);
 		if(fs.statSync(src).isFile()){
+			if(type && type.indexOf(path.extname(src).substring(1)) == -1){
+				continue;
+			}
 			target = task.target;
 			if(nf.isDirectoryPath(target)){
 				if(keepHierarchy){

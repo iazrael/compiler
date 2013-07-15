@@ -166,10 +166,24 @@ var makePathArray = function(arr, root){
 	if(!ztool.isArray(arr)){
 		arr = [arr];
 	}
-	for (var i = 0; i < arr.length; i++) {
-		arr[i] = path.join(root, arr[i]);
+	var result = [], tmpArr, excludeArr = [], excludeMode;
+	for (var i = 0, str; str = arr[i]; i++) {
+		// excludeMode = false;
+		// if(str.indexOf('^')){
+		// 	excludeMode = true;
+		// 	str = str.substring(1);
+		// }
+		tmpArr = nf.query(root, arr[i]);
+		// if(excludeMode){
+		// 	excludeArr = excludeArr.concat(tmpArr);
+		// }else{
+			for(var j = 0, rStr; rStr = tmpArr[j]; j++){
+				result.push(path.join(root, rStr));
+			}
+		// }
 	};
-	return arr;
+	// console.log(result);
+	return result;
 }
 
 var getCombineId = function(arr){
@@ -315,6 +329,7 @@ var clean = function(){
 
 //************ 下面是主流程 ************************************
 var compile = function(fileName){
+	console.log('preparing...');
 	compileStart = new Date();
 	readConfig(fileName);
 	init();//console.log(compileCmds);
